@@ -1,1 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>eventz4u — You Imagine, We Execute</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@100;200;300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red:      #c0443a;
+      --crimson:  #e85d52;
+      --gold:     #c9a96e;
+      --petal:    #e8b4a0;
+      --deep:     #0f0a0a;
+      --dark2:    #1a0d0d;
+      --cream:    #fdf8f4;
+      --champagne:#f5ebe0;
+    }
 
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      background: var(--deep);
+      color: var(--cream);
+      font-family: 'Josefin Sans', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:100; opacity:0.4;
+    }
+
+    .cursor {
+      width:12px; height:12px; background:var(--gold); border-radius:50%;
+      position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+      transform:translate(-50%,-50%);
+      transition:width .3s, height .3s, background .3s;
+    }
+    .cursor-ring {
+      width:36px; height:36px; border:1px solid var(--red); border-radius:50%;
+      position:fixed; top:0; left:0; pointer-events:none; z-index:9998;
+      transform:translate(-50%,-50%);
+      transition:width .3s, height .3s;
+    }
+
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:500;
+      padding:28px 60px;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:background .5s, backdrop-filter .5s;
+    }
+    nav.scrolled {
+      background:rgba(15,10,10,0.88);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(201,169,110,0.15);
+    }
+    .nav-logo {
+      font-family:'Cormorant Garamond', serif;
+      font-size:1.5rem; font-weight:300; letter-spacing:0.12em; color:var(--gold);
+      text-decoration:none;
+    }
+    .nav-logo span { font-style:italic; color:var(--petal); }
+    .nav-links { display:flex; gap:40px; list-style:none; }
+    .nav-links a {
+      font-size:.7rem; letter-spacing:.22em; text-transform:uppercase;
+      color:var(--champagne); text-decoration:none; position:relative; transition:color .3s;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-4px; left:0;
+      width:0; height:1px; background:var(--gold); transition:width .4s;
+    }
+    .nav-links a:hover { color:var(--gold); }
+    .nav-links a:hover::after { width:100%; }
+
+    #hero {
+      position:relative; height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+    }
+    .hero-bg {
+      position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(192,68,58,0.16) 0%, transparent 60%),
+        radial-gradient(ellipse at 75% 30%, rgba(201,169,110,0.10) 0%, transparent 50%),
+        linear-gradient(160deg, #0f0a0a 0%, #1f0d0d 50%, #0f0a0a 100%);
+    }
+    .ring {
+      position:absolute; border-radius:50%;
+      border:1px solid rgba(201,169,110,0.10);
+      animation:pulseRing 6s ease-in-out infinite;
+    }
+    .ring:nth-child(1){width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:0s;}
+    .ring:nth-child(2){width:750px;height:750px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1s;}
+    .ring:nth-child(3){width:1000px;height:1000px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:2s;}
+    @keyframes pulseRing {
+      0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1);}
+      50%{opacity:.08;transform:translate(-50%,-50%) scale(1.03);}
+    }
+    .petal-float {
+      position:absolute; pointer-events:none;
+      animation:floatPetal linear infinite; opacity:0;
+    }
+    @keyframes floatPetal {
+      0%{transform:translateY(110vh) rotate(0deg);opacity:0;}
+      5%{opacity:.5;} 95%{opacity:.3;}
+      100%{transform:translateY(-10vh) rotate(720deg);opacity:0;}
+    }
+    .hero-content { position:relative; z-index:10; text-align:center; padding:0 20px; }
+    .hero-eyebrow {
+      font-size:.65rem; letter-spacing:.35em; text-transform:uppercase; color:var(--gold);
+      margin-bottom:24px; opacity:0; animation:fadeUp 1s .3s forwards;
+    }
+    .hero-title {
+      font-family:'Cormorant Garamond', serif;
+      font-size:clamp(3.5rem,9vw,8rem); font-weight:300;
+      line-height:.95; opacity:0; animation:fadeUp 1.1s .6s forwards;
+    }
+    .hero-title em { font-style:italic; color:var(--petal); display:block; }
+    .hero-tagline {
+      margin-top:28px; font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(245,235,224,.5); opacity:0; animation:fadeUp 1s 1s forwards;
+    }
+    .hero-cta {
+      margin-top:56px; display:inline-flex; gap:24px; align-items:center;
+      opacity:0; animation:fadeUp 1s 1.3s forwards;
+    }
+    .btn-primary {
+      padding:16px 44px; border:1px solid var(--gold); color:var(--gold);
+      text-decoration:none; font-size:.65rem; letter-spacing:.25em; text-transform:uppercase;
+      position:relative; overflow:hidden; transition:color .4s;
+    }
+    .btn-primary::before {
+      content:''; position:absolute; inset:0; background:var(--gold);
+      transform:translateX(-101%); transition:transform .4s cubic-bezier(.76,0,.24,1); z-index:-1;
+    }
+    .btn-primary:hover { color:var(--deep); }
+    .btn-primary:hover::before { transform:translateX(0); }
+    .btn-ghost {
+      font-size:.65rem; letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(245,235,224,.5); text-decoration:none;
+      display:flex; align-items:center; gap:10px; transition:color .3s;
+    }
+    .btn-ghost:hover { color:var(--petal); }
+    .btn-ghost::after { content:'↓'; font-size:1rem; }
+
+    .scroll-line {
+      position:absolute; bottom:40px; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      opacity:0; animation:fadeIn 1s 2s forwards;
+    }
+    .scroll-line span { font-size:.55rem; letter-spacing:.3em; text-transform:uppercase; color:rgba(245,235,224,.35); }
+    .scroll-line-bar {
+      width:1px; height:60px;
+      background:linear-gradient(to bottom,var(--gold),transparent);
+      animation:scrollBar 2s 2s ease-in-out infinite;
+    }
+    @keyframes scrollBar {
+      0%{transform:scaleY(0);transform-origin:top;}
+      50%{transform:scaleY(1);transform-origin:top;}
+      51%{transform:scaleY(1);transform-origin:bottom;}
+      100%{transform:scaleY(0);transform-origin:bottom;}
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+    .stats-bar {
+      background:rgba(201,169,110,.06);
+      border-top:1px solid rgba(201,169,110,.12);
+      border-bottom:1px solid rgba(201,169,110,.12);
+      padding:32px 60px;
+      display:flex; justify-content:center; gap:80px;
+      backdrop-filter:blur(10px);
+    }
+    .stat-item { text-align:center; }
+    .stat-num {
+      font-family:'Cormorant Garamond', serif;
+      font-size:2.4rem; font-weight:300; color:var(--gold); line-height:1;
+    }
+    .stat-label { font-size:.6rem; letter-spacing:.25em; text-transform:uppercase; color:rgba(245,235,224,.4); margin-top:6px; }
+
+    .section-eyebrow { font-size:.6rem; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
+    .section-title {
+      font-family:'Cormorant Garamond', serif;
+      font-size:clamp(2.5rem,5vw,4rem); font-weight:300; line-height:1.1; color:var(--cream);
+    }
+    .section-title em { font-style:italic; color:var(--petal); }
+
+    #services { padding:120px 60px; }
+    .services-header { text-align:center; margin-bottom:80px; }
+    .services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; max-width:1200px; margin:0 auto; }
+    .service-card {
+      background:rgba(245,235,224,.03); border:1px solid rgba(201,169,110,.08);
+      padding:52px 40px; position:relative; overflow:hidden;
+      transition:background .4s, border-color .4s; cursor:default;
+    }
+    .service-card::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(192,68,58,.06) 0%,transparent 60%);
+      opacity:0; transition:opacity .4s;
+    }
+    .service-card:hover { border-color:rgba(201,169,110,.25); }
+    .service-card:hover::before { opacity:1; }
+    .service-number { font-family:'Cormorant Garamond', serif; font-size:.75rem; color:rgba(201,169,110,.4); letter-spacing:.2em; margin-bottom:28px; }
+    .service-icon { font-size:2rem; margin-bottom:20px; display:block; transition:transform .4s; }
+    .service-card:hover .service-icon { transform:scale(1.15) rotate(-5deg); }
+    .service-name { font-family:'Cormorant Garamond', serif; font-size:1.6rem; font-weight:400; color:var(--cream); margin-bottom:12px; line-height:1.2; }
+    .service-desc { font-size:.65rem; letter-spacing:.1em; line-height:2; color:rgba(245,235,224,.4); text-transform:uppercase; }
+    .service-line {
+      position:absolute; bottom:0; left:40px; height:2px; width:0;
+      background:linear-gradient(to right,var(--gold),var(--red));
+      transition:width .5s cubic-bezier(.76,0,.24,1);
+    }
+    .service-card:hover .service-line { width:calc(100% - 80px); }
+
+    #about { padding:120px 60px; background:linear-gradient(180deg,transparent 0%,rgba(192,68,58,.04) 50%,transparent 100%); }
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:100px; max-width:1200px; margin:0 auto; align-items:center; }
+    .about-visual { position:relative; height:550px; }
+    .about-frame { position:absolute; border:1px solid rgba(201,169,110,.2); border-radius:2px; }
+    .about-frame-1 {
+      inset:0;
+      background:linear-gradient(135deg,rgba(192,68,58,.15) 0%,rgba(15,10,10,.8) 100%);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .about-frame-2 { width:180px; height:180px; bottom:-30px; right:-30px; background:rgba(201,169,110,.06); border-color:rgba(201,169,110,.12); }
+    .about-frame-3 { width:100px; height:100px; top:-20px; left:-20px; border-color:rgba(192,68,58,.2); background:transparent; }
+    .about-center-text { text-align:center; padding:40px; }
+    .about-big-num { font-family:'Cormorant Garamond', serif; font-size:8rem; font-weight:300; color:rgba(201,169,110,.12); line-height:1; position:absolute; }
+    .about-big-label { font-size:.6rem; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); position:relative; z-index:2; }
+    .about-quote { font-family:'Cormorant Garamond', serif; font-size:1.8rem; font-weight:300; font-style:italic; color:var(--petal); line-height:1.5; position:relative; z-index:2; margin-top:8px; }
+    .about-text h2 { font-family:'Cormorant Garamond', serif; font-size:clamp(2rem,4vw,3.2rem); font-weight:300; line-height:1.15; margin-bottom:32px; }
+    .about-text h2 em { font-style:italic; color:var(--petal); }
+    .about-text p { font-size:.7rem; letter-spacing:.08em; line-height:2.2; color:rgba(245,235,224,.5); text-transform:uppercase; margin-bottom:20px; }
+    .about-divider { width:60px; height:1px; background:linear-gradient(to right,var(--gold),transparent); margin:32px 0; }
+    .contact-pill {
+      display:inline-flex; align-items:center; gap:12px;
+      padding:14px 28px; border:1px solid rgba(201,169,110,.25); color:var(--gold);
+      font-size:.65rem; letter-spacing:.2em; text-transform:uppercase;
+      text-decoration:none; transition:background .3s, border-color .3s; margin-top:8px;
+    }
+    .contact-pill:hover { background:rgba(201,169,110,.07); border-color:var(--gold); }
+
+    #gallery { padding:120px 60px; }
+    .gallery-grid { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows:280px 280px; gap:4px; max-width:1200px; margin:60px auto 0; }
+    .gallery-item { position:relative; overflow:hidden; background:rgba(245,235,224,.04); border:1px solid rgba(201,169,110,.06); }
+    .gallery-item:first-child { grid-row:1/3; }
+    .gallery-item-inner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; transition:transform .6s cubic-bezier(.76,0,.24,1); }
+    .gallery-item:hover .gallery-item-inner { transform:scale(1.05); }
+    .gallery-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(15,10,10,.7) 0%,transparent 50%); opacity:0; transition:opacity .4s; z-index:2; display:flex; align-items:flex-end; padding:24px; }
+    .gallery-item:hover .gallery-overlay { opacity:1; }
+    .gallery-label { font-size:.6rem; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); }
+    .gallery-emoji { font-size:3rem; opacity:.3; }
+    .gallery-placeholder-text { font-family:'Cormorant Garamond', serif; font-size:1.2rem; font-style:italic; color:rgba(245,235,224,.2); }
+
+    #testimonials { padding:120px 60px; background:linear-gradient(180deg,transparent,rgba(201,169,110,.03),transparent); }
+    .testimonials-track { max-width:900px; margin:60px auto 0; position:relative; min-height:220px; }
+    .testimonial-slide { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; opacity:0; transform:translateY(20px); transition:opacity .7s, transform .7s; pointer-events:none; }
+    .testimonial-slide.active { opacity:1; transform:translateY(0); pointer-events:all; }
+    .testimonial-quote { font-family:'Cormorant Garamond', serif; font-size:clamp(1.4rem,3vw,2rem); font-weight:300; font-style:italic; color:var(--cream); line-height:1.6; margin-bottom:28px; }
+    .testimonial-author { font-size:.6rem; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); }
+    .quote-mark { font-family:'Cormorant Garamond', serif; font-size:5rem; color:rgba(201,169,110,.15); line-height:.5; margin-bottom:20px; }
+    .testimonial-dots { display:flex; justify-content:center; gap:10px; margin-top:50px; }
+    .dot { width:6px; height:6px; border-radius:50%; background:rgba(201,169,110,.25); border:none; cursor:pointer; transition:background .3s, transform .3s; }
+    .dot.active { background:var(--gold); transform:scale(1.4); }
+
+    #contact { padding:120px 60px; position:relative; overflow:hidden; }
+    #contact::before { content:''; position:absolute; width:800px; height:800px; border-radius:50%; background:radial-gradient(circle,rgba(192,68,58,.07) 0%,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
+    .contact-wrapper { max-width:700px; margin:0 auto; text-align:center; position:relative; }
+    .contact-details { margin:60px 0; display:flex; flex-direction:column; gap:20px; align-items:center; }
+    .contact-item { display:flex; align-items:center; gap:16px; font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,235,224,.5); }
+    .contact-item span:first-child { color:var(--gold); font-size:1rem; }
+    .contact-item a { color:rgba(245,235,224,.5); text-decoration:none; transition:color .3s; }
+    .contact-item a:hover { color:var(--gold); }
+    .contact-large-btn {
+      display:inline-block; padding:22px 60px;
+      background:linear-gradient(135deg,var(--red),var(--gold));
+      color:var(--deep); text-decoration:none;
+      font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; font-weight:400;
+      transition:transform .3s, box-shadow .3s;
+      box-shadow:0 0 40px rgba(192,68,58,.2);
+    }
+    .contact-large-btn:hover { transform:translateY(-2px); box-shadow:0 8px 50px rgba(192,68,58,.35); }
+
+    footer { border-top:1px solid rgba(201,169,110,.1); padding:40px 60px; display:flex; align-items:center; justify-content:space-between; }
+    .footer-logo { font-family:'Cormorant Garamond', serif; font-size:1.1rem; font-weight:300; color:var(--gold); letter-spacing:.1em; }
+    .footer-copy { font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,235,224,.25); }
+    .footer-social { display:flex; gap:24px; }
+    .footer-social a { font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,235,224,.35); text-decoration:none; transition:color .3s; }
+    .footer-social a:hover { color:var(--gold); }
+
+    .reveal { opacity:0; transform:translateY(40px); transition:opacity .9s cubic-bezier(.76,0,.24,1), transform .9s cubic-bezier(.76,0,.24,1); }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay:.15s; }
+    .reveal-delay-2 { transition-delay:.3s; }
+    .reveal-delay-3 { transition-delay:.45s; }
+
+    @media(max-width:900px){
+      nav{padding:20px 24px;} .nav-links{display:none;}
+      .stats-bar{gap:30px;padding:24px;flex-wrap:wrap;}
+      #services,#about,#gallery,#testimonials,#contact{padding:80px 24px;}
+      .services-grid{grid-template-columns:1fr;}
+      .about-grid{grid-template-columns:1fr;gap:60px;}
+      .about-visual{height:300px;}
+      .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+      .gallery-item:first-child{grid-row:auto;}
+      footer{flex-direction:column;gap:16px;text-align:center;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav id="navbar">
+    <a href="#" class="nav-logo">eventz<span>4</span>u</a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-bg">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+    </div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Weddings · Corporate Events · Live Performances · Artist Management</p>
+      <h1 class="hero-title">
+        You Imagine,
+        <em>We Execute</em>
+      </h1>
+      <p class="hero-tagline">Extraordinary events, flawlessly brought to life</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn-primary">Plan Your Event</a>
+        <a href="#services" class="btn-ghost">Our Services</a>
+      </div>
+    </div>
+    <div class="scroll-line">
+      <span>Scroll</span>
+      <div class="scroll-line-bar"></div>
+    </div>
+  </section>
+
+  <div class="stats-bar reveal">
+    <div class="stat-item"><div class="stat-num" data-count="500">0</div><div class="stat-label">Events Delivered</div></div>
+    <div class="stat-item"><div class="stat-num" data-count="200">0</div><div class="stat-label">Artists Managed</div></div>
+    <div class="stat-item"><div class="stat-num" data-count="10">0</div><div class="stat-label">Years Experience</div></div>
+    <div class="stat-item"><div class="stat-num" data-count="50">0</div><div class="stat-label">Cities Covered</div></div>
+  </div>
+
+  <section id="services">
+    <div class="services-header reveal">
+      <p class="section-eyebrow">What We Offer</p>
+      <h2 class="section-title">Every Vision,<br><em>Perfectly Realised</em></h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal"><div class="service-number">01</div><span class="service-icon">💍</span><h3 class="service-name">Wedding Planning</h3><p class="service-desc">Your dream wedding, orchestrated without compromise</p><div class="service-line"></div></div>
+      <div class="service-card reveal reveal-delay-1"><div class="service-number">02</div><span class="service-icon">🎨</span><h3 class="service-name">Theme Décor</h3><p class="service-desc">Transforming spaces into immersive worlds</p><div class="service-line"></div></div>
+      <div class="service-card reveal reveal-delay-2"><div class="service-number">03</div><span class="service-icon">🎤</span><h3 class="service-name">Artist Management</h3><p class="service-desc">World-class talent, curated exclusively for you</p><div class="service-line"></div></div>
+      <div class="service-card reveal reveal-delay-1"><div class="service-number">04</div><span class="service-icon">🎵</span><h3 class="service-name">Live Events</h3><p class="service-desc">Electrifying performances and live entertainment</p><div class="service-line"></div></div>
+      <div class="service-card reveal reveal-delay-2"><div class="service-number">05</div><span class="service-icon">🏢</span><h3 class="service-name">Corporate Events</h3><p class="service-desc">Elevating your brand through extraordinary gatherings</p><div class="service-line"></div></div>
+      <div class="service-card reveal reveal-delay-3"><div class="service-number">06</div><span class="service-icon">🎂</span><h3 class="service-name">Birthday Events</h3><p class="service-desc">Celebrations crafted with love and precision</p><div class="service-line"></div></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-frame about-frame-3"></div>
+        <div class="about-frame about-frame-1">
+          <div class="about-center-text">
+            <div class="about-big-num">e</div>
+            <p class="about-big-label">Est. with Passion</p>
+            <p class="about-quote">"Every event is<br>a story waiting<br>to be told"</p>
+          </div>
+        </div>
+        <div class="about-frame about-frame-2"></div>
+      </div>
+      <div class="about-text reveal reveal-delay-1">
+        <p class="section-eyebrow">Our Story</p>
+        <h2>We Don't Just Plan Events,<br>We <em>Create Legacies</em></h2>
+        <div class="about-divider"></div>
+        <p>eventz4u is a premier event management company built on a single belief — that every event deserves to be extraordinary. From the first conversation to the final curtain call, we pour our craft into every detail.</p>
+        <p>Weddings, concerts, corporate galas, artist management — whatever you imagine, our team has the vision, the network, and the drive to execute it flawlessly.</p>
+        <div class="about-divider"></div>
+        <a href="#contact" class="contact-pill">✦ Let's Create Together</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <div style="text-align:center;" class="reveal">
+      <p class="section-eyebrow">Our Work</p>
+      <h2 class="section-title">Moments We've<br><em>Brought to Life</em></h2>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal"><div class="gallery-item-inner"><span class="gallery-emoji">✨</span><p class="gallery-placeholder-text">Grand Wedding Setup</p></div><div class="gallery-overlay"><span class="gallery-label">Wedding Dreams</span></div></div>
+      <div class="gallery-item reveal reveal-delay-1"><div class="gallery-item-inner"><span class="gallery-emoji">🎊</span><p class="gallery-placeholder-text">Live Concert</p></div><div class="gallery-overlay"><span class="gallery-label">Live Events</span></div></div>
+      <div class="gallery-item reveal reveal-delay-2"><div class="gallery-item-inner"><span class="gallery-emoji">🎤</span><p class="gallery-placeholder-text">Artist Performance</p></div><div class="gallery-overlay"><span class="gallery-label">Artist Management</span></div></div>
+      <div class="gallery-item reveal reveal-delay-1"><div class="gallery-item-inner"><span class="gallery-emoji">🎂</span><p class="gallery-placeholder-text">Birthday Magic</p></div><div class="gallery-overlay"><span class="gallery-label">Celebrations</span></div></div>
+      <div class="gallery-item reveal reveal-delay-2"><div class="gallery-item-inner"><span class="gallery-emoji">🏢</span><p class="gallery-placeholder-text">Corporate Gala</p></div><div class="gallery-overlay"><span class="gallery-label">Corporate Events</span></div></div>
+    </div>
+  </section>
+
+  <section id="testimonials">
+    <div style="text-align:center;" class="reveal">
+      <p class="section-eyebrow">Client Love</p>
+      <h2 class="section-title">Words That<br><em>Mean Everything</em></h2>
+    </div>
+    <div class="testimonials-track reveal">
+      <div class="testimonial-slide active"><div class="quote-mark">"</div><p class="testimonial-quote">eventz4u turned our wedding into the most breathtaking day of our lives. Every detail was beyond imagination.</p><span class="testimonial-author">— Priya & Rajan, Wedding Clients</span></div>
+      <div class="testimonial-slide"><div class="quote-mark">"</div><p class="testimonial-quote">Our product launch was flawless. The team's creativity and professionalism left our entire audience speechless.</p><span class="testimonial-author">— Aditya Sharma, Corporate Client</span></div>
+      <div class="testimonial-slide"><div class="quote-mark">"</div><p class="testimonial-quote">The concert they produced was pure magic — staging, lighting, artist management. Absolutely world-class.</p><span class="testimonial-author">— Live Event, Mumbai</span></div>
+    </div>
+    <div class="testimonial-dots">
+      <button class="dot active" data-index="0"></button>
+      <button class="dot" data-index="1"></button>
+      <button class="dot" data-index="2"></button>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact-wrapper reveal">
+      <p class="section-eyebrow">Get In Touch</p>
+      <h2 class="section-title">Let's Build Your<br><em>Next Great Event</em></h2>
+      <div class="contact-details">
+        <div class="contact-item"><span>📞</span><a href="#">+91 XXXX XXXXXX</a></div>
+        <div class="contact-item"><span>✉️</span><a href="#">hello@eventz4u.com</a></div>
+        <div class="contact-item"><span>📸</span><a href="#">@eventz4u</a></div>
+      </div>
+      <a href="mailto:hello@eventz4u.com" class="contact-large-btn">Send Us a Message →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">eventz4u</div>
+    <div class="footer-copy">© 2025 eventz4u — You Imagine, We Execute</div>
+    <div class="footer-social">
+      <a href="#">Instagram</a>
+      <a href="#">Facebook</a>
+      <a href="#">WhatsApp</a>
+    </div>
+  </footer>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+    (function loop(){
+      cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+      rx+=(mx-rx)*.1; ry+=(my-ry)*.1;
+      ring.style.left=rx+'px'; ring.style.top=ry+'px';
+      requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a,button,.service-card,.gallery-item').forEach(el=>{
+      el.addEventListener('mouseenter',()=>{ cursor.style.width='20px';cursor.style.height='20px';cursor.style.background='var(--red)';ring.style.width='52px';ring.style.height='52px'; });
+      el.addEventListener('mouseleave',()=>{ cursor.style.width='12px';cursor.style.height='12px';cursor.style.background='var(--gold)';ring.style.width='36px';ring.style.height='36px'; });
+    });
+
+    window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>60));
+
+    const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }),{threshold:.1});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+    function animCount(el,target){
+      let s=null;
+      const step=ts=>{ if(!s)s=ts; const p=Math.min((ts-s)/1800,1); el.textContent=Math.floor((1-Math.pow(1-p,3))*target).toLocaleString(); if(p<1)requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }
+    const cObs=new IntersectionObserver(entries=>{ if(entries[0].isIntersecting){ document.querySelectorAll('[data-count]').forEach(el=>animCount(el,+el.dataset.count)); cObs.disconnect(); } },{threshold:.5});
+    cObs.observe(document.querySelector('.stats-bar'));
+
+    const slides=document.querySelectorAll('.testimonial-slide');
+    const dots=document.querySelectorAll('.dot');
+    let current=0, timer;
+    function goTo(i){slides[current].classList.remove('active');dots[current].classList.remove('active');current=i;slides[current].classList.add('active');dots[current].classList.add('active');}
+    dots.forEach(d=>d.addEventListener('click',()=>{ clearInterval(timer); goTo(+d.dataset.index); timer=setInterval(()=>goTo((current+1)%slides.length),5000); }));
+    timer=setInterval(()=>goTo((current+1)%slides.length),5000);
+
+    const shapes=['✦','✧','◇','◆','·'];
+    for(let i=0;i<18;i++){
+      const p=document.createElement('div');
+      p.className='petal-float';
+      p.textContent=shapes[Math.floor(Math.random()*shapes.length)];
+      p.style.cssText=`left:${Math.random()*100}vw;font-size:${8+Math.random()*12}px;animation-duration:${12+Math.random()*16}s;animation-delay:${Math.random()*14}s;color:${Math.random()>.5?'var(--gold)':'var(--red)'};`;
+      document.getElementById('hero').appendChild(p);
+    }
+  </script>
+</body>
+</html>
